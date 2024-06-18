@@ -5,6 +5,7 @@ import pygame as pg
 
 
 WIDTH, HEIGHT = 1600, 900
+
 DELTA = {
     pg.K_UP:(0,-5),
     pg.K_DOWN:(0, +5),
@@ -28,6 +29,17 @@ def check_bound(rct: pg.Rect) -> tuple[bool, bool]:
     return yoko, tate
 
 
+def speed():
+
+    saccs = [a for a in range(1,11)]
+    bb_imgs = []
+    for r in range(1,11):
+        bb_img = pg.Surface((20 * r,20 * r),pg.SRCALPHA)
+        pg.draw.circle(bb_img,(255,0, 0),(10 *r,10 * r))
+    return bb_imgs,saccs
+
+
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -35,14 +47,13 @@ def main():
     kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 2.0)
     kk_rct = kk_img.get_rect()
     kk_rct.center = 900, 400
-    bb_img = pg.Surface((20,20))
-    bb_img.set_colorkey((0, 0, 0))
-    pg.draw.circle(bb_img, (255, 0, 0),(10, 10), 10)
-    bb_rct = bb_img.get_rect()
+    bb_imgs,saccs = speed()
+    bb_rct = bb_imgs[0].get_rect()
     bb_rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
     vx, vy = +5, +5
     clock = pg.time.Clock()
     tmr = 0
+
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT: 
@@ -62,8 +73,13 @@ def main():
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])
         screen.blit(kk_img, kk_rct)
 
-        bb_rct.move_ip(vx, vy)
-        yoko, tate = check_bound(bb_rct)
+        idx = min(tmr // 500,9)
+        bb_rct = bb_imgs[idx].get_rect(center=bb_rct.center)
+        avx = vx * saccs[idx]
+        avy = vy * saccs[idx]
+        bb_rct.move_ip(avx.avy)
+        yoko,tate = check_bound(bb_rct)
+        
         if not yoko:
             vx *= -1
         if not tate:
